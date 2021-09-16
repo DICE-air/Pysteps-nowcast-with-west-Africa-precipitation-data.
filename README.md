@@ -1,10 +1,12 @@
 # Pysteps nowcast with west Africa precipitation data.
 
-All the nowcasts base on the installation of Pysteps. The website is below.
+Nowcast is a short-term weather forecast, which only predicts the weather change within 6 hours from the start point.
+
+All the nowcasts in this project based on the installation of Pysteps.
 
 https://pysteps.readthedocs.io/en/latest/user_guide/install_pysteps.html
 
-The first thing of first,  find a good place to store the Precipitation data on 20210522.
+The first thing of first, find a good place to store the Precipitation data on 20210522.
 
 Second, in order to feed the data into "STEPSs nowcast.py". Go to the pystepsrc and modify your "rootpath" , the data tag is at the bottom of the "pystepsrc". Now your new configuration file is ready, you can copy and paste it to replace your default "pystepsrc".
 
