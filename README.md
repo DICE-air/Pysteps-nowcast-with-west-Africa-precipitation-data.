@@ -12,6 +12,8 @@ Second, in order to feed the data into "STEPSs nowcast.py". Go to the pystepsrc 
 
 Remember, importers.py should be put in your "io" file (within your Pysteps file)to replace the old one, otherwise the Pysteps can only plot the map of example data which come along with Pysteps when you download it.
 
+STEPs, verification and evaluation, and strom tracking are the main py files to yield the results.
+
 Everything seemed to be set,now you can try on:)
 
 
