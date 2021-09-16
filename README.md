@@ -1,4 +1,4 @@
-# Pysteps-nowcast-with-west-Africa-precipitation-data.
+# Pysteps nowcast with west Africa precipitation data.
 
 All the nowcasts base on the installation of Pysteps. The website is below.
 
