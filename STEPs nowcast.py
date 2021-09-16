@@ -1,0 +1,159 @@
+
+
+import matplotlib.pyplot as plt
+import numpy as np
+from datetime import datetime
+from pprint import pprint
+import pysteps
+import cartopy
+from pysteps import io, nowcasts, rcparams
+from pysteps.motion.lucaskanade import dense_lucaskanade # 这是lucaskanade方法
+from pysteps.postprocessing.ensemblestats import excprob
+from pysteps.utils import conversion, dimension, transformation
+from pysteps.visualization import plot_precip_field
+# Set nowcast parameters
+n_ens_members = 20
+n_leadtimes = 6
+seed = 24
+
+#################################################
+date = datetime.strptime("202105220045", "%Y%m%d%H%M")
+
+data_source = "westaf"  # 这个是我自己希望导入的数据
+
+
+#################################################
+pysteps.rcparams['data_sources']
+print(pysteps.rcparams['data_sources'])
+
+###############################################
+# # Load data source config
+root_path = rcparams.data_sources[data_source]["root_path"]
+print(root_path)
+path_fmt = rcparams.data_sources[data_source]["path_fmt"]
+print(path_fmt)
+fn_pattern = rcparams.data_sources[data_source]["fn_pattern"]
+fn_ext = rcparams.data_sources[data_source]["fn_ext"]
+importer_name = rcparams.data_sources[data_source]["importer"]
+print(importer_name)
+importer_kwargs = rcparams.data_sources[data_source]["importer_kwargs"]
+timestep = rcparams.data_sources[data_source]["timestep"]
+
+#######################################################################
+# Find the radar files in the archive
+fns = io.find_by_date(
+    date, root_path, path_fmt, fn_pattern, fn_ext, timestep, num_prev_files=0, num_next_files=3
+)
+# print(date)
+
+
+##########################################################################
+# Read the data from the archive
+importer = io.get_method(importer_name, "importer")
+R, _, metadata = io.read_timeseries(fns, importer, **importer_kwargs)
+
+# Convert to rain rate
+R, metadata = conversion.to_rainrate(R, metadata)
+
+# Upscale data to 2 km to limit memory usage
+R, metadata = dimension.aggregate_fields_space(R, metadata, 1000)
+
+# Plot the rainfall field
+plot_precip_field(R[-1, :, :], geodata=metadata)
+plt.show()
+
+# Log-transform the data to unit of dBR, set the threshold to 0.1 mm/h,
+# set the fill value to -15 dBR
+R, metadata = transformation.dB_transform(R, metadata, threshold=0.1, zerovalue=-15.0)
+
+# Set missing values with the fill value
+R[~np.isfinite(R)] = -30.0
+
+# Nicely print the metadata
+pprint(metadata)
+
+###################################################################################
+# Estimate the motion field
+V = dense_lucaskanade(R)
+
+# The S-PROG nowcast
+nowcast_method = nowcasts.get_method("sprog")
+R_f = nowcast_method(
+    R[-3:, :, :],
+    V,
+    n_leadtimes,
+    n_cascade_levels=6,
+    R_thr=-10.0,
+)
+
+# Back-transform to rain rate
+R_f = transformation.dB_transform(R_f, threshold=-10.0, inverse=True)[0]
+
+# Plot the S-PROG forecast
+plot_precip_field(
+    R_f[-1, :, :],
+    geodata=metadata,
+    title="S-PROG (+ %i min)" % (n_leadtimes * timestep),
+)
+plt.show()
+
+#######################################################################
+# The STEPS nowcast
+nowcast_method = nowcasts.get_method("steps")
+R_f = nowcast_method(
+    R[-3:, :, :],
+    V,
+    n_leadtimes,
+    n_ens_members,
+    n_cascade_levels=6,
+    R_thr=-10.0,
+    kmperpixel=2.0,
+    timestep=timestep,
+    noise_method="nonparametric",
+    vel_pert_method="bps",
+    mask_method="incremental",
+    seed=seed,
+)
+
+# Back-transform to rain rates
+R_f = transformation.dB_transform(R_f, threshold=-10.0, inverse=True)[0]
+
+
+# Plot the ensemble mean
+R_f_mean = np.mean(R_f[:, -1, :, :], axis=0)
+plot_precip_field(
+    R_f_mean,
+    geodata=metadata,
+    title="Ensemble mean (+ %i min)" % (n_leadtimes * timestep),
+)
+plt.show()
+
+###########################################
+# Plot some of the realizations
+fig = plt.figure()
+for i in range(4):
+    ax = fig.add_subplot(221 + i)
+    ax = plot_precip_field(
+        R_f[i, -1, :, :], geodata=metadata, colorbar=False, axis="off"
+    )
+    ax.set_title("Member %02d" % i)
+plt.tight_layout()
+plt.show()
+
+##################################################
+
+# Compute exceedence probabilities for a 0.5 mm/h threshold
+P = excprob(R_f[:, -1, :, :], 0.5)
+
+# Plot the field of probabilities
+plot_precip_field(
+    P,
+    geodata=metadata,
+    ptype="prob",
+    units="mm/h",
+    probthr=0.5,
+    title="Exceedence probability (+ %i min)" % (n_leadtimes * timestep),
+)
+plt.show()
+
+# sphinx_gallery_thumbnail_number = 5

@@ -1,0 +1,102 @@
+{
+    "silent_import": false,
+    "outputs": {
+        "path_outputs": "./"
+    },
+    "plot": {
+        "motion_plot": "quiver",
+        "colorscale": "pysteps"
+    },
+    "data_sources": {
+        "bom": {
+            "root_path": "C:\\Users\\Kai\u2018s Laptop\\pysteps_data\\radar\\bom",
+            "path_fmt": "prcp-cscn/2/%Y/%m/%d",
+            "fn_pattern": "2_%Y%m%d_%H%M00.prcp-cscn",
+            "fn_ext": "nc",
+            "importer": "bom_rf3",
+            "timestep": 6,
+            "importer_kwargs": {
+                "gzipped": true
+            }
+        },
+        "fmi": {
+            "root_path": "C:\\Users\\Kai\u2018s Laptop\\pysteps_data\\radar\\fmi",
+            "path_fmt": "%Y%m%d",
+            "fn_pattern": "%Y%m%d%H%M_fmi.radar.composite.lowest_FIN_SUOMI1",
+            "fn_ext": "pgm.gz",
+            "importer": "fmi_pgm",
+            "timestep": 5,
+            "importer_kwargs": {
+                "gzipped": true
+            }
+        },
+        "mch": {
+            "root_path": "C:\\Users\\Kai\u2018s Laptop\\pysteps_data\\radar\\mch",
+            "path_fmt": "%Y%m%d",
+            "fn_pattern": "AQC%y%j%H%M?_00005.801",
+            "fn_ext": "gif",
+            "importer": "mch_gif",
+            "timestep": 5,
+            "importer_kwargs": {
+                "product": "AQC",
+                "unit": "mm",
+                "accutime": 5
+            }
+        },
+        "mrms": {
+            "root_path": "C:\\Users\\Kai\u2018s Laptop\\pysteps_data\\mrms",
+            "path_fmt": "%Y/%m/%d",
+            "fn_pattern": "PrecipRate_00.00_%Y%m%d-%H%M%S",
+            "fn_ext": "grib2",
+            "importer": "mrms_grib",
+            "timestep": 2,
+            "importer_kwargs": {}
+        },
+        "opera": {
+            "root_path": "C:\\Users\\Kai\u2018s Laptop\\pysteps_data\\radar\\OPERA",
+            "path_fmt": "%Y%m%d",
+            "fn_pattern": "T_PAAH21_C_EUOC_%Y%m%d%H%M%S",
+            "fn_ext": "hdf",
+            "importer": "opera_hdf5",
+            "timestep": 15,
+            "importer_kwargs": {}
+        },
+        "knmi": {
+            "root_path": "C:\\Users\\Kai\u2018s Laptop\\pysteps_data\\radar\\KNMI",
+            "path_fmt": "%Y/%m",
+            "fn_pattern": "RAD_NL25_RAP_5min_%Y%m%d%H%M",
+            "fn_ext": "h5",
+            "importer": "knmi_hdf5",
+            "timestep": 5,
+            "importer_kwargs": {
+                "accutime": 5,
+                "qty": "ACRR",
+                "pixelsize": 1.0
+            }
+        },
+        "saf": {
+            "root_path": "C:\\Users\\Kai\u2018s Laptop\\pysteps_data\\saf",
+            "path_fmt": "%Y%m%d/CRR",
+            "fn_pattern": "S_NWC_CRR_MSG4_Europe-VISIR_%Y%m%dT%H%M00Z",
+            "fn_ext": "nc",
+            "importer": "saf_crri",
+            "timestep": 15,
+            "importer_kwargs": {
+                "gzipped": true
+            }
+        },
+		"westaf": {
+             "root_path": "C:\\westaf\\20210522old",
+             "path_fmt": "%Y%m%d",
+             "fn_pattern": "CRR_rainfall_%Y%m%d_%H%M_regridded_nearest",
+             "fn_ext": "gif",
+             "importer": "mch_gif",
+             "timestep": 15,
+             "importer_kwargs": {
+			 "product": "AQC",
+                "unit": "mm",
+                "accutime": 5
+			 }
+		}
+    }
+}
